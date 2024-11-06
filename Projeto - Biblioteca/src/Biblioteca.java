@@ -1,4 +1,3 @@
-// Biblioteca.java
 import java.io.*;
 import java.util.ArrayList;
 
@@ -7,8 +6,8 @@ import java.util.ArrayList;
  */
 public class Biblioteca {
     // Listas de itens e membros
-    public ArrayList<Item> listaItens;
-    public ArrayList<Membro> listaMembros;
+    private ArrayList<Item> listaItens;
+    private ArrayList<Membro> listaMembros;
 
     private static Biblioteca instance;
 
@@ -29,6 +28,10 @@ public class Biblioteca {
         }
         return instance;
     }
+    
+    public ArrayList<Membro> getListaMembros() {
+        return listaMembros;
+    }
 
     /**
      * Método para adicionar um item à biblioteca.
@@ -41,13 +44,7 @@ public class Biblioteca {
      * Método para remover um item da biblioteca.
      */
     public boolean removerItem(String idItem) {
-        for (Item item : listaItens) {
-            if (item.getId().equals(idItem)) {
-                listaItens.remove(item);
-                return true;
-            }
-        }
-        return false;
+        return listaItens.removeIf(item -> item.getId().equals(idItem));
     }
 
     /**
@@ -88,6 +85,10 @@ public class Biblioteca {
         carregarMembrosCSV();
     }
 
+    public void adicionarMembro(Membro membro) {
+        listaMembros.add(membro);
+    }
+
     // Métodos privados para manipulação de arquivos
     private void salvarItensCSV() {
         try (PrintWriter pw = new PrintWriter(new File("itens.csv"))) {
@@ -109,7 +110,7 @@ public class Biblioteca {
     }
 
     private void carregarItensCSV() {
-        try (BufferedReader br = new BufferedReader(new FileReader("itens.csv"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("membros.csv"))) {
             String linha;
             while ((linha = br.readLine()) != null) {
                 String[] dados = linha.split(",");
@@ -144,15 +145,24 @@ public class Biblioteca {
     }
 
     private void carregarMembrosCSV() {
-        try (BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\emmanuel.victorio\\Downloads\\Projeto-Biblioteca\\Projeto - Biblioteca\\src\\membros.csv"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("membros.csv"))) {
             String linha;
             while ((linha = br.readLine()) != null) {
+                System.out.println("Reading line: " + linha);  // Debug: Print each line being read
+    
                 String[] dados = linha.split(",");
+                if (dados.length < 5) { // Ensure there are at least 5 fields
+                    System.out.println("Error: Line format is incorrect - " + linha);
+                    continue;  // Skip improperly formatted lines
+                }
+    
                 if (dados[0].equals("Bibliotecario")) {
-                    Bibliotecario bibliotecario = new Bibliotecario(dados[1], dados[2], dados[3]);
+                    // Instantiate Bibliotecario with five fields, defaulting endereco to an empty string
+                    Bibliotecario bibliotecario = new Bibliotecario(dados[1], dados[2], "", dados[3], dados[4]);
                     listaMembros.add(bibliotecario);
                 } else if (dados[0].equals("Membro")) {
-                    Membro membro = new Membro(dados[1], dados[2], dados[3]);
+                    // Instantiate Membro with five fields, defaulting endereco to an empty string
+                    Membro membro = new Membro(dados[1], dados[2], "", dados[3], dados[4]);
                     listaMembros.add(membro);
                 }
             }
@@ -161,16 +171,23 @@ public class Biblioteca {
             System.out.println("Erro ao carregar os membros: " + e.getMessage());
         }
     }
-
+        
     /**
-     * Método para autenticar um usuário no sistema.
+     * Método para autenticar um usuário no sistema pelo ID, nome e tipo de usuário.
      */
-    public Membro autenticarUsuario(String id, String nome) {
+    public Membro autenticarUsuario(String login, String senha, String tipoUsuario) {
         for (Membro membro : listaMembros) {
-            if (membro.getIdMembro().equals(id) && membro.getNome().equals(nome)) {
+            // Verify login, senha, and user type
+            if (membro.getLogin().equals(login) && membro.getSenha().equals(senha) && membro.getClass().getSimpleName().equals(tipoUsuario)) {
                 return membro;
             }
         }
-        return null;
+        return null; // Return null if no matching user is found
+    }
+    
+
+    public Item[] getListaItens() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getListaItens'");
     }
 }

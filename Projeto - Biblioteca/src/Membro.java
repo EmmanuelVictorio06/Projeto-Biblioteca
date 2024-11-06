@@ -8,19 +8,26 @@ public class Membro {
     protected String idMembro;
     protected String nome;
     protected String endereco;
+    protected String login;
+    protected String senha;
     protected ArrayList<Item> itensEmprestados;
 
-    /**
-     * Construtor da classe Membro.
-     */
-    public Membro(String idMembro, String nome, String endereco) {
+    public Membro(String idMembro, String nome, String endereco, String login, String senha) {
         this.idMembro = idMembro;
         this.nome = nome;
         this.endereco = endereco;
-        this.itensEmprestados = new ArrayList<>();
+        this.login = login;
+        this.senha = senha;
     }
 
-    // Métodos getters e setters
+    public String getLogin() {
+        return login;
+    }
+
+    public String getSenha() {
+        return senha;
+    }
+
     public String getIdMembro() {
         return idMembro;
     }
