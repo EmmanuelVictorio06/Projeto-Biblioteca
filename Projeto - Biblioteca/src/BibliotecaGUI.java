@@ -2,6 +2,8 @@
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileWriter;
+import java.io.IOException;
 
 /**
  * Classe que representa a interface gráfica da biblioteca.
@@ -33,28 +35,98 @@ public class BibliotecaGUI extends JFrame {
      * Método para exibir a tela de login.
      */
     private void telaLogin() {
-        JTextField txtId = new JTextField();
-        JTextField txtNome = new JTextField();
+        JTextField txtLogin = new JTextField();
+        JPasswordField txtSenha = new JPasswordField();
+        JComboBox<String> userTypeDropdown = new JComboBox<>(new String[]{"Membro", "Bibliotecario"});
+    
         Object[] message = {
-                "ID:", txtId,
-                "Nome:", txtNome
+            "Login:", txtLogin,
+            "Senha:", txtSenha,
+            "Tipo de Usuário:", userTypeDropdown
         };
-
-        int option = JOptionPane.showConfirmDialog(this, message, "Login", JOptionPane.OK_CANCEL_OPTION);
-        if (option == JOptionPane.OK_OPTION) {
-            String id = txtId.getText();
-            String nome = txtNome.getText();
-            usuarioAtual = Biblioteca.getInstance().autenticarUsuario(id, nome);
+    
+        // Create the panel with Login, Register, and Cancel options
+        JPanel panel = new JPanel();
+        panel.add(new JLabel("Login:"));
+        panel.add(txtLogin);
+        panel.add(Box.createVerticalStrut(15)); // a spacer
+        panel.add(new JLabel("Senha:"));
+        panel.add(txtSenha);
+        panel.add(Box.createVerticalStrut(15)); // a spacer
+        panel.add(new JLabel("Tipo de Usuário:"));
+        panel.add(userTypeDropdown);
+    
+        // Buttons for OK, Cancel, and Register
+        Object[] options = {"OK", "Cancelar", "Registrar"};
+        int option = JOptionPane.showOptionDialog(this, message, "Login", JOptionPane.YES_NO_CANCEL_OPTION, 
+                                                  JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+    
+        // Handle button responses
+        if (option == JOptionPane.YES_OPTION) { // OK button clicked
+            String login = txtLogin.getText();
+            String senha = new String(txtSenha.getPassword());
+            String tipoUsuario = (String) userTypeDropdown.getSelectedItem();
+    
+            usuarioAtual = Biblioteca.getInstance().autenticarUsuario(login, senha, tipoUsuario);
             if (usuarioAtual != null) {
                 JOptionPane.showMessageDialog(this, "Bem-vindo, " + usuarioAtual.getNome() + "!");
                 menuPrincipal();
             } else {
-                JOptionPane.showMessageDialog(this, "Usuário não encontrado.");
+                JOptionPane.showMessageDialog(this, "Login, senha ou tipo de usuário incorretos.");
                 telaLogin();
             }
+        } else if (option == JOptionPane.CANCEL_OPTION) { // Register button clicked
+            telaRegistro();
         } else {
-            System.exit(0);
+            System.exit(0); // Cancel button clicked
         }
+    }
+    
+
+    private void telaRegistro() {
+    JTextField txtNome = new JTextField();
+    JTextField txtLogin = new JTextField();
+    JPasswordField txtSenha = new JPasswordField();
+    JComboBox<String> userTypeDropdown = new JComboBox<>(new String[]{"Membro", "Bibliotecario"});
+
+    Object[] message = {
+        "Nome:", txtNome,
+        "Login:", txtLogin,
+        "Senha:", txtSenha,
+        "Tipo de Usuário:", userTypeDropdown
+    };
+
+    int option = JOptionPane.showConfirmDialog(this, message, "Registro", JOptionPane.OK_CANCEL_OPTION);
+    if (option == JOptionPane.OK_OPTION) {
+        String nome = txtNome.getText();
+        String login = txtLogin.getText();
+        String senha = new String(txtSenha.getPassword());
+        String tipoUsuario = (String) userTypeDropdown.getSelectedItem();
+
+        if (nome.isEmpty() || login.isEmpty() || senha.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Todos os campos são obrigatórios.");
+            telaRegistro();
+        } else {
+            // Generate a unique ID for the new user
+            String id = generateUniqueId();
+
+            // Save the new user to membros.csv
+            try (FileWriter writer = new FileWriter("membros.csv", true)) {
+                writer.write(tipoUsuario + "," + id + "," + nome + "," + login + "," + senha + "\n");
+                JOptionPane.showMessageDialog(this, tipoUsuario + " registrado com sucesso!");
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "Erro ao salvar os dados: " + e.getMessage());
+            }
+
+            // Return to the login screen after registration
+            telaLogin();
+        }
+    }
+}
+
+    // Método para gerar IDs únicos (pode ser uma implementação simples)
+    private String generateUniqueId() {
+        return "ID" + (Biblioteca.getInstance().getListaMembros().size() + 1);
     }
 
     /**
@@ -149,7 +221,7 @@ public class BibliotecaGUI extends JFrame {
      */
     private void listarItens() {
         textArea.setText("");
-        for (Item item : Biblioteca.getInstance().listaItens) {
+        for (Item item : Biblioteca.getInstance().getListaItens()) {
             textArea.append(item.getTitulo() + " - " + item.getId() + "\n");
         }
     }
