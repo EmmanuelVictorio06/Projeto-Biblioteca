@@ -34,16 +34,8 @@ public class BibliotecaGUI extends JFrame {
         exibirLista("Membro", true);
     }
     
-    private void excluirMembro() {
-        exibirLista("Membro", false);
-    }
-    
     private void editarBibliotecario() {
         exibirLista("Bibliotecario", true);
-    }
-    
-    private void excluirBibliotecario() {
-        exibirLista("Bibliotecario", false);
     }
     
     private void exibirLista(String tipoUsuario, boolean isEditar) {
