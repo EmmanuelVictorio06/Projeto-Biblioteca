@@ -39,7 +39,7 @@ public class Membro {
     public String getEndereco() {
         return endereco;
     }
-
+    
     public void setIdMembro(String idMembro) {
         this.idMembro = idMembro;
     }
@@ -50,6 +50,14 @@ public class Membro {
 
     public void setEndereco(String endereco) {
         this.endereco = endereco;
+    }
+
+    public void setLogin(String login) {
+        this.login = login;
+    }
+    
+    public void setSenha(String senha) {
+        this.senha = senha;
     }
 
     /**
