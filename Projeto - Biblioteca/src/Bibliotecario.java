@@ -1,4 +1,3 @@
-// Bibliotecario.java
 
 /**
  * Classe que representa um bibliotecário, herda de Membro.
