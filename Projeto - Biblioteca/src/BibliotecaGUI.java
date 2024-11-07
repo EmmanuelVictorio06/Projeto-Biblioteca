@@ -1,9 +1,14 @@
 // BibliotecaGUI.java
 import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Classe que representa a interface gráfica da biblioteca.
@@ -21,15 +26,177 @@ public class BibliotecaGUI extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(null);
 
-        // Área de texto para exibir informações
-        textArea = new JTextArea();
-        JScrollPane scrollPane = new JScrollPane(textArea);
-        scrollPane.setBounds(20, 150, 740, 400);
-        add(scrollPane);
-
         // Inicia a tela de login
         telaLogin();
     }
+
+    private void editarMembro() {
+        exibirLista("Membro", true);
+    }
+    
+    private void excluirMembro() {
+        exibirLista("Membro", false);
+    }
+    
+    private void editarBibliotecario() {
+        exibirLista("Bibliotecario", true);
+    }
+    
+    private void excluirBibliotecario() {
+        exibirLista("Bibliotecario", false);
+    }
+    
+    private void exibirLista(String tipoUsuario, boolean isEditar) {
+        JDialog dialog = new JDialog(this, "Lista de " + tipoUsuario + "s", true);
+        dialog.setSize(600, 400);
+        dialog.setLayout(new BorderLayout());
+    
+        List<?> usuarios = tipoUsuario.equals("Membro") ? Biblioteca.getInstance().getListaMembros()
+                                                        : Biblioteca.getInstance().getListaBibliotecarios();
+        String[] colunas = {"ID", "Nome", "Endereço", "Login"};
+        String[][] dados = new String[usuarios.size()][4];
+    
+        for (int i = 0; i < usuarios.size(); i++) {
+            if (tipoUsuario.equals("Membro")) {
+                Membro membro = (Membro) usuarios.get(i);
+                dados[i][0] = membro.getIdMembro();
+                dados[i][1] = membro.getNome();
+                dados[i][2] = membro.getEndereco();
+                dados[i][3] = membro.getLogin();
+            } else {
+                Bibliotecario bibliotecario = (Bibliotecario) usuarios.get(i);
+                dados[i][0] = bibliotecario.getIdMembro();
+                dados[i][1] = bibliotecario.getNome();
+                dados[i][2] = bibliotecario.getEndereco();
+                dados[i][3] = bibliotecario.getLogin();
+            }
+        }
+    
+        JTable tabela = new JTable(dados, colunas);
+        JScrollPane scrollPane = new JScrollPane(tabela);
+        dialog.add(scrollPane, BorderLayout.CENTER);
+    
+        JPanel panelBotoes = new JPanel();
+    
+        JButton btnExcluir = new JButton("Excluir");
+        btnExcluir.addActionListener(e -> {
+            int linhaSelecionada = tabela.getSelectedRow();
+            if (linhaSelecionada != -1) {
+                String id = (String) tabela.getValueAt(linhaSelecionada, 0);
+    
+                if (tipoUsuario.equals("Membro")) {
+                    Membro membro = Biblioteca.getInstance().buscarMembro(id);
+                    if (membro != null) {
+                        Biblioteca.getInstance().getListaMembros().remove(membro);
+                        JOptionPane.showMessageDialog(dialog, "Membro excluído com sucesso!");
+                    }
+                } else {
+                    Bibliotecario bibliotecario = Biblioteca.getInstance().buscarBibliotecario(id);
+                    if (bibliotecario != null) {
+                        Biblioteca.getInstance().getListaBibliotecarios().remove(bibliotecario);
+                        JOptionPane.showMessageDialog(dialog, "Bibliotecário excluído com sucesso!");
+                    }
+                }
+                dialog.dispose();
+                exibirLista(tipoUsuario, isEditar);
+            } else {
+                JOptionPane.showMessageDialog(dialog, "Selecione um " + tipoUsuario + " para excluir.");
+            }
+        });
+    
+        panelBotoes.add(btnExcluir);
+    
+        if (isEditar) {
+            JButton btnEditar = new JButton("Editar");
+            btnEditar.addActionListener(e -> {
+                int linhaSelecionada = tabela.getSelectedRow();
+                if (linhaSelecionada != -1) {
+                    String id = (String) tabela.getValueAt(linhaSelecionada, 0);
+                    abrirJanelaEdicao(id, tipoUsuario);
+                    dialog.dispose();
+                } else {
+                    JOptionPane.showMessageDialog(dialog, "Selecione um " + tipoUsuario + " para editar.");
+                }
+            });
+            panelBotoes.add(btnEditar);
+        }
+    
+        dialog.add(panelBotoes, BorderLayout.SOUTH);
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
+    }
+    
+    private void abrirJanelaEdicao(String id, String tipoUsuario) {
+        JDialog editDialog = new JDialog(this, "Editar " + tipoUsuario, true);
+        editDialog.setSize(400, 350);
+        editDialog.setLayout(new GridLayout(6, 2));
+    
+        // Obtendo o usuário selecionado
+        Membro usuario = tipoUsuario.equals("Membro") ? Biblioteca.getInstance().buscarMembro(id)
+                                                      : Biblioteca.getInstance().buscarBibliotecario(id);
+    
+        if (usuario == null) return; // Caso o usuário não seja encontrado
+    
+        // Campos para edição
+        JTextField txtNome = new JTextField(usuario.getNome());
+        JTextField txtEndereco = new JTextField(usuario.getEndereco());
+        JTextField txtLogin = new JTextField(usuario.getLogin());
+        JPasswordField txtSenha = new JPasswordField(usuario.getSenha());
+    
+        editDialog.add(new JLabel("ID:"));
+        editDialog.add(new JLabel(usuario.getIdMembro())); // Exibe o ID como label, não editável
+        editDialog.add(new JLabel("Nome:"));
+        editDialog.add(txtNome);
+        editDialog.add(new JLabel("Endereço:"));
+        editDialog.add(txtEndereco);
+        editDialog.add(new JLabel("Login:"));
+        editDialog.add(txtLogin);
+        editDialog.add(new JLabel("Senha:"));
+        editDialog.add(txtSenha);
+    
+        JButton btnSalvar = new JButton("Salvar");
+        btnSalvar.addActionListener(e -> {
+            boolean alterado = false;
+    
+            if (!txtNome.getText().equals(usuario.getNome())) {
+                usuario.setNome(txtNome.getText());
+                alterado = true;
+            }
+            if (!txtEndereco.getText().equals(usuario.getEndereco())) {
+                usuario.setEndereco(txtEndereco.getText());
+                alterado = true;
+            }
+            if (!txtLogin.getText().equals(usuario.getLogin())) {
+                usuario.setLogin(txtLogin.getText());
+                alterado = true;
+            }
+            if (!new String(txtSenha.getPassword()).equals(usuario.getSenha())) {
+                usuario.setSenha(new String(txtSenha.getPassword()));
+                alterado = true;
+            }
+    
+            if (alterado) {
+                JOptionPane.showMessageDialog(editDialog, tipoUsuario + " editado com sucesso!");
+                editDialog.dispose();
+            } else {
+                JOptionPane.showMessageDialog(editDialog, "Nenhuma alteração realizada.");
+            }
+        });
+    
+        JButton btnCancelar = new JButton("Cancelar");
+        btnCancelar.addActionListener(e -> editDialog.dispose());
+    
+        JPanel panelBotoes = new JPanel();
+        panelBotoes.add(btnSalvar);
+        panelBotoes.add(btnCancelar);
+    
+        editDialog.add(panelBotoes);
+    
+        editDialog.setLocationRelativeTo(this);
+        editDialog.setVisible(true);
+    }
+    
+    
 
     /**
      * Método para exibir a tela de login.
@@ -37,7 +204,7 @@ public class BibliotecaGUI extends JFrame {
     private void telaLogin() {
         JTextField txtLogin = new JTextField();
         JPasswordField txtSenha = new JPasswordField();
-        JComboBox<String> userTypeDropdown = new JComboBox<>(new String[]{"Membro", "Bibliotecario"});
+        JComboBox<String> userTypeDropdown = new JComboBox<>(new String[]{"Membro", "Bibliotecario", "Administrador"});
     
         Object[] message = {
             "Login:", txtLogin,
@@ -45,29 +212,21 @@ public class BibliotecaGUI extends JFrame {
             "Tipo de Usuário:", userTypeDropdown
         };
     
-        // Create the panel with Login, Register, and Cancel options
-        JPanel panel = new JPanel();
-        panel.add(new JLabel("Login:"));
-        panel.add(txtLogin);
-        panel.add(Box.createVerticalStrut(15)); // a spacer
-        panel.add(new JLabel("Senha:"));
-        panel.add(txtSenha);
-        panel.add(Box.createVerticalStrut(15)); // a spacer
-        panel.add(new JLabel("Tipo de Usuário:"));
-        panel.add(userTypeDropdown);
-    
-        // Buttons for OK, Cancel, and Register
         Object[] options = {"OK", "Cancelar", "Registrar"};
         int option = JOptionPane.showOptionDialog(this, message, "Login", JOptionPane.YES_NO_CANCEL_OPTION, 
                                                   JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
     
-        // Handle button responses
         if (option == JOptionPane.YES_OPTION) { // OK button clicked
             String login = txtLogin.getText();
             String senha = new String(txtSenha.getPassword());
             String tipoUsuario = (String) userTypeDropdown.getSelectedItem();
     
-            usuarioAtual = Biblioteca.getInstance().autenticarUsuario(login, senha, tipoUsuario);
+            if ("Administrador".equals(tipoUsuario)) {
+                usuarioAtual = autenticarAdministrador(login, senha);
+            } else {
+                usuarioAtual = Biblioteca.getInstance().autenticarUsuario(login, senha, tipoUsuario);
+            }
+    
             if (usuarioAtual != null) {
                 JOptionPane.showMessageDialog(this, "Bem-vindo, " + usuarioAtual.getNome() + "!");
                 menuPrincipal();
@@ -75,13 +234,32 @@ public class BibliotecaGUI extends JFrame {
                 JOptionPane.showMessageDialog(this, "Login, senha ou tipo de usuário incorretos.");
                 telaLogin();
             }
-        } else if (option == JOptionPane.CANCEL_OPTION) { // Register button clicked
-            telaRegistro();
+        } else if (option == JOptionPane.CANCEL_OPTION) {
+            // Somente membros e bibliotecários podem se registrar
+            if (!"Administrador".equals(userTypeDropdown.getSelectedItem())) {
+                telaRegistro();
+            } else {
+                JOptionPane.showMessageDialog(this, "Administradores não podem se registrar.");
+            }
         } else {
-            System.exit(0); // Cancel button clicked
+            System.exit(0);
         }
     }
-    
+
+    private Administrador autenticarAdministrador(String login, String senha) {
+    try (BufferedReader br = new BufferedReader(new FileReader("admin.csv"))) {
+        String linha;
+        while ((linha = br.readLine()) != null) {
+            String[] dados = linha.split(",");
+            if (dados[0].equals(login) && dados[1].equals(senha)) {
+                return new Administrador("adminID", "Administrador", "Endereco Admin", login, senha);
+            }
+        }
+    } catch (IOException e) {
+        JOptionPane.showMessageDialog(this, "Erro ao ler o arquivo admin.csv: " + e.getMessage());
+    }
+    return null; // Retorna null se a autenticação falhar
+}
 
     private void telaRegistro() {
     JTextField txtNome = new JTextField();
@@ -139,21 +317,21 @@ public class BibliotecaGUI extends JFrame {
         JButton btnDevolverItem = new JButton("Devolver Item");
         JButton btnSalvarDados = new JButton("Salvar Dados");
         JButton btnCarregarDados = new JButton("Carregar Dados");
-
+    
         // Definição de posições dos botões
         btnListarItens.setBounds(20, 20, 150, 30);
         btnEmprestarItem.setBounds(180, 20, 150, 30);
         btnDevolverItem.setBounds(340, 20, 150, 30);
         btnSalvarDados.setBounds(500, 20, 150, 30);
         btnCarregarDados.setBounds(660, 20, 150, 30);
-
+    
         // Adiciona os botões à interface
         add(btnListarItens);
         add(btnEmprestarItem);
         add(btnDevolverItem);
         add(btnSalvarDados);
         add(btnCarregarDados);
-
+    
         // Verifica se o usuário é bibliotecário para liberar funções extras
         if (usuarioAtual instanceof Bibliotecario) {
             JButton btnAdicionarItem = new JButton("Adicionar Item");
@@ -162,7 +340,7 @@ public class BibliotecaGUI extends JFrame {
             btnRemoverItem.setBounds(180, 70, 150, 30);
             add(btnAdicionarItem);
             add(btnRemoverItem);
-
+    
             // Ações dos botões de bibliotecário
             btnAdicionarItem.addActionListener(new ActionListener() {
                 @Override
@@ -170,7 +348,7 @@ public class BibliotecaGUI extends JFrame {
                     adicionarItem();
                 }
             });
-
+    
             btnRemoverItem.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -178,7 +356,34 @@ public class BibliotecaGUI extends JFrame {
                 }
             });
         }
-
+    
+        // Verifica se o usuário é administrador para liberar funções extras de administração
+        if (usuarioAtual instanceof Administrador) {
+            JButton btnEditarMembro = new JButton("Editar Membro");
+            JButton btnEditarBibliotecario = new JButton("Editar Bibliotecário");
+    
+            btnEditarMembro.setBounds(20, 120, 150, 30);
+            btnEditarBibliotecario.setBounds(180, 120, 150, 30);
+    
+            add(btnEditarMembro);
+            add(btnEditarBibliotecario);
+    
+            // Ações dos botões de administrador    
+            btnEditarMembro.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    editarMembro();
+                }
+            });
+    
+            btnEditarBibliotecario.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    editarBibliotecario();
+                }
+            });
+        }
+    
         // Ações dos botões comuns
         btnListarItens.addActionListener(new ActionListener() {
             @Override
@@ -186,28 +391,28 @@ public class BibliotecaGUI extends JFrame {
                 listarItens();
             }
         });
-
+    
         btnEmprestarItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 emprestarItem();
             }
         });
-
+    
         btnDevolverItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 devolverItem();
             }
         });
-
+    
         btnSalvarDados.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Biblioteca.getInstance().salvarDados();
             }
         });
-
+    
         btnCarregarDados.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -215,7 +420,6 @@ public class BibliotecaGUI extends JFrame {
             }
         });
     }
-
     /**
      * Método para listar os itens na área de texto.
      */

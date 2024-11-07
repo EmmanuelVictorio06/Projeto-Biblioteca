@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Classe singleton que representa a biblioteca.
@@ -8,6 +9,7 @@ public class Biblioteca {
     // Listas de itens e membros
     private ArrayList<Item> listaItens;
     private ArrayList<Membro> listaMembros;
+    private List<Bibliotecario> listaBibliotecarios = new ArrayList<>();
 
     private static Biblioteca instance;
 
@@ -133,9 +135,9 @@ public class Biblioteca {
         try (PrintWriter pw = new PrintWriter(new File("membros.csv"))) {
             for (Membro membro : listaMembros) {
                 if (membro instanceof Bibliotecario) {
-                    pw.println("Bibliotecario," + membro.getIdMembro() + "," + membro.getNome() + "," + membro.getEndereco());
+                    pw.println("Bibliotecario," + membro.getIdMembro() + "," + membro.getNome() + "," + membro.getEndereco() + "," + membro.getLogin() + "," + membro.getSenha());
                 } else {
-                    pw.println("Membro," + membro.getIdMembro() + "," + membro.getNome() + "," + membro.getEndereco());
+                    pw.println("Membro," + membro.getIdMembro() + "," + membro.getNome() + "," + membro.getEndereco() + "," + membro.getLogin() + "," + membro.getSenha());
                 }
             }
             System.out.println("Membros salvos com sucesso!");
@@ -143,7 +145,7 @@ public class Biblioteca {
             System.out.println("Erro ao salvar os membros: " + e.getMessage());
         }
     }
-
+    
     private void carregarMembrosCSV() {
         try (BufferedReader br = new BufferedReader(new FileReader("membros.csv"))) {
             String linha;
@@ -151,18 +153,23 @@ public class Biblioteca {
                 System.out.println("Reading line: " + linha);  // Debug: Print each line being read
     
                 String[] dados = linha.split(",");
-                if (dados.length < 5) { // Ensure there are at least 5 fields
+                if (dados.length < 5) { // Verifique se há pelo menos 5 campos (tipo, ID, nome, login, senha)
                     System.out.println("Error: Line format is incorrect - " + linha);
-                    continue;  // Skip improperly formatted lines
+                    continue;  // Pule linhas com formato incorreto
                 }
     
-                if (dados[0].equals("Bibliotecario")) {
-                    // Instantiate Bibliotecario with five fields, defaulting endereco to an empty string
-                    Bibliotecario bibliotecario = new Bibliotecario(dados[1], dados[2], "", dados[3], dados[4]);
+                String tipoUsuario = dados[0];
+                String id = dados[1];
+                String nome = dados[2];
+                String endereco = dados.length > 5 ? dados[3] : "";  // Campo opcional de endereço
+                String login = dados[dados.length > 5 ? 4 : 3];
+                String senha = dados[dados.length > 5 ? 5 : 4];
+    
+                if (tipoUsuario.equals("Bibliotecario")) {
+                    Bibliotecario bibliotecario = new Bibliotecario(id, nome, endereco, login, senha);
                     listaMembros.add(bibliotecario);
-                } else if (dados[0].equals("Membro")) {
-                    // Instantiate Membro with five fields, defaulting endereco to an empty string
-                    Membro membro = new Membro(dados[1], dados[2], "", dados[3], dados[4]);
+                } else if (tipoUsuario.equals("Membro")) {
+                    Membro membro = new Membro(id, nome, endereco, login, senha);
                     listaMembros.add(membro);
                 }
             }
@@ -170,8 +177,8 @@ public class Biblioteca {
         } catch (IOException e) {
             System.out.println("Erro ao carregar os membros: " + e.getMessage());
         }
-    }
-        
+    }    
+    
     /**
      * Método para autenticar um usuário no sistema pelo ID, nome e tipo de usuário.
      */
@@ -184,7 +191,28 @@ public class Biblioteca {
         }
         return null; // Return null if no matching user is found
     }
-    
+
+    public Bibliotecario buscarBibliotecario(String id) {
+        for (Bibliotecario bibliotecario : listaBibliotecarios) {
+            if (bibliotecario.getIdMembro().equals(id)) {
+                return bibliotecario;
+            }
+        }
+        return null; // Retorna null se o bibliotecário não for encontrado
+    }
+
+    public Membro buscarMembro(String id) {
+        for (Membro membro : listaMembros) {
+            if (membro.getIdMembro().equals(id)) {
+                return membro;
+            }
+        }
+        return null; // Retorna null se o membro não for encontrado
+    }
+
+    public List<Bibliotecario> getListaBibliotecarios() {
+        return listaBibliotecarios;
+    }    
 
     public Item[] getListaItens() {
         // TODO Auto-generated method stub
