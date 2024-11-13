@@ -7,8 +7,8 @@ public class Bibliotecario extends Membro {
     /**
      * Construtor da classe Bibliotecario.
      */
-    public Bibliotecario(String idMembro, String nome, String endereco, String login, String senha) {
-        super(idMembro, nome, endereco, login, senha);
+    public Bibliotecario(String idMembro, String nome, String tipo, String login, String senha) {
+        super(idMembro, nome, tipo, login, senha);
     }
 
     /**

@@ -18,7 +18,7 @@ public class BibliotecaGUI extends JFrame {
 
     public BibliotecaGUI() {
         setTitle("Sistema de Gerenciamento de Biblioteca");
-        setSize(800, 600);
+        setSize(756, 553);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(null);
 
@@ -26,7 +26,7 @@ public class BibliotecaGUI extends JFrame {
         textArea = new JTextArea();
         textArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(textArea);
-        scrollPane.setBounds(20, 150, 740, 400);
+        scrollPane.setBounds(20, 150, 700, 350);
         add(scrollPane);
 
         // Inicia a tela de login
@@ -52,7 +52,7 @@ public class BibliotecaGUI extends JFrame {
         // Obtem a lista de usuários do tipo especificado
         List<?> usuarios = tipoUsuario.equals("Membro") ? Biblioteca.getInstance().getListaMembros()
                                                         : Biblioteca.getInstance().getListaBibliotecarios();
-        String[] colunas = {"ID", "Nome", "Endereço", "Login"};
+        String[] colunas = {"ID", "Nome", "Tipo", "Login"};
         String[][] dados = new String[usuarios.size()][4];
 
         // Preenche a tabela com os dados dos usuários
@@ -61,13 +61,13 @@ public class BibliotecaGUI extends JFrame {
                 Membro membro = (Membro) usuarios.get(i);
                 dados[i][0] = membro.getIdMembro();
                 dados[i][1] = membro.getNome();
-                dados[i][2] = membro.getEndereco();
+                dados[i][2] = membro.getTipoUsuario();
                 dados[i][3] = membro.getLogin();
             } else {
                 Bibliotecario bibliotecario = (Bibliotecario) usuarios.get(i);
                 dados[i][0] = bibliotecario.getIdMembro();
                 dados[i][1] = bibliotecario.getNome();
-                dados[i][2] = bibliotecario.getEndereco();
+                dados[i][2] = bibliotecario.getTipoUsuario();
                 dados[i][3] = bibliotecario.getLogin();
             }
         }
@@ -142,7 +142,8 @@ public class BibliotecaGUI extends JFrame {
 
         // Campos para edição
         JTextField txtNome = new JTextField(usuario.getNome());
-        JTextField txtEndereco = new JTextField(usuario.getEndereco());
+        JComboBox<String> cmbTipoUsuario = new JComboBox<>(new String[]{"Membro", "Bibliotecario"});
+        cmbTipoUsuario.setSelectedItem(usuario.getTipoUsuario()); // Define o tipo atual como selecionado
         JTextField txtLogin = new JTextField(usuario.getLogin());
         JPasswordField txtSenha = new JPasswordField(usuario.getSenha());
 
@@ -150,8 +151,8 @@ public class BibliotecaGUI extends JFrame {
         editDialog.add(new JLabel(usuario.getIdMembro())); // Exibe o ID como label, não editável
         editDialog.add(new JLabel("Nome:"));
         editDialog.add(txtNome);
-        editDialog.add(new JLabel("Endereço:"));
-        editDialog.add(txtEndereco);
+        editDialog.add(new JLabel("Tipo:"));
+        editDialog.add(cmbTipoUsuario);
         editDialog.add(new JLabel("Login:"));
         editDialog.add(txtLogin);
         editDialog.add(new JLabel("Senha:"));
@@ -167,8 +168,8 @@ public class BibliotecaGUI extends JFrame {
                 usuario.setNome(txtNome.getText());
                 alterado = true;
             }
-            if (!txtEndereco.getText().equals(usuario.getEndereco())) {
-                usuario.setEndereco(txtEndereco.getText());
+            if (!cmbTipoUsuario.getSelectedItem().equals(usuario.getTipoUsuario())) {
+                usuario.setTipoUsuario((String) cmbTipoUsuario.getSelectedItem());
                 alterado = true;
             }
             if (!txtLogin.getText().equals(usuario.getLogin())) {
@@ -257,7 +258,7 @@ public class BibliotecaGUI extends JFrame {
             while ((linha = br.readLine()) != null) {
                 String[] dados = linha.split(",");
                 if (dados[0].equals(login) && dados[1].equals(senha)) {
-                    return new Administrador("adminID", "Administrador", "Endereco Admin", login, senha);
+                    return new Administrador("adminID", "Administrador", " Admin", login, senha);
                 }
             }
         } catch (IOException e) {
@@ -291,10 +292,10 @@ public class BibliotecaGUI extends JFrame {
             JOptionPane.showMessageDialog(this, "Todos os campos são obrigatórios.");
             telaRegistro();
         } else {
-            // Generate a unique ID for the new user
+            //Gera um ID exclusivo para o novo usuário
             String id = generateUniqueId();
 
-            // Save the new user to membros.csv
+            // Salva o novo usuário em membros.csv
             try (FileWriter writer = new FileWriter("membros.csv", true)) {
                 writer.write(tipoUsuario + "," + id + "," + nome + "," + login + "," + senha + "\n");
                 JOptionPane.showMessageDialog(this, tipoUsuario + " registrado com sucesso!");
@@ -302,7 +303,7 @@ public class BibliotecaGUI extends JFrame {
                 JOptionPane.showMessageDialog(this, "Erro ao salvar os dados: " + e.getMessage());
             }
 
-            // Return to the login screen after registration
+            //Retorna a tela de login após o cadastro
             telaLogin();
         }
     }
@@ -324,11 +325,13 @@ public class BibliotecaGUI extends JFrame {
         JButton btnCarregarDados = new JButton("Carregar Dados");
 
         // Definição de posições dos botões
-        btnListarItens.setBounds(20, 20, 150, 30);
-        btnEmprestarItem.setBounds(180, 20, 150, 30);
-        btnDevolverItem.setBounds(340, 20, 150, 30);
-        btnSalvarDados.setBounds(500, 20, 150, 30);
-        btnCarregarDados.setBounds(660, 20, 150, 30);
+        btnListarItens.setBounds(20, 20, 130, 30);
+        btnEmprestarItem.setBounds(160, 20, 130, 30);
+        btnDevolverItem.setBounds(300, 20, 130, 30);
+        btnSalvarDados.setBounds(440, 20, 130, 30);
+        btnCarregarDados.setBounds(580, 20, 130, 30);
+        
+        
 
         // Adiciona os botões à interface
         add(btnListarItens);
@@ -377,8 +380,8 @@ public class BibliotecaGUI extends JFrame {
             JButton btnAdicionarItem = new JButton("Adicionar Item");
             JButton btnRemoverItem = new JButton("Remover Item");
 
-            btnAdicionarItem.setBounds(20, 70, 150, 30);
-            btnRemoverItem.setBounds(180, 70, 150, 30);
+            btnAdicionarItem.setBounds(20, 70, 130, 30);
+            btnRemoverItem.setBounds(160, 70, 130, 30);    
 
             add(btnAdicionarItem);
             add(btnRemoverItem);
@@ -403,8 +406,8 @@ public class BibliotecaGUI extends JFrame {
             JButton btnEditarMembro = new JButton("Editar Membro");
             JButton btnEditarBibliotecario = new JButton("Editar Bibliotecário");
 
-            btnEditarMembro.setBounds(20, 120, 150, 30);
-            btnEditarBibliotecario.setBounds(180, 120, 150, 30);
+            btnEditarMembro.setBounds(20, 100, 130, 30);
+            btnEditarBibliotecario.setBounds(160, 100, 130, 30);
 
             add(btnEditarMembro);
             add(btnEditarBibliotecario);
@@ -453,48 +456,65 @@ public class BibliotecaGUI extends JFrame {
      * Método para adicionar um livro.
      */
     private void adicionarLivro() {
-        try {
-            String id = JOptionPane.showInputDialog("ID do Livro:");
-            String titulo = JOptionPane.showInputDialog("Título do Livro:");
-            int ano = Integer.parseInt(JOptionPane.showInputDialog("Ano de Publicação:"));
-            String autor = JOptionPane.showInputDialog("Autor:");
-            String editora = JOptionPane.showInputDialog("Editora:");
-
-            if (id.isEmpty() || titulo.isEmpty() || autor.isEmpty() || editora.isEmpty()) {
-                throw new IllegalArgumentException("Todos os campos devem ser preenchidos.");
-            }
-
-            Livro livro = new Livro(id, titulo, ano, autor, editora);
-            Biblioteca.getInstance().adicionarItem(livro); // Adiciona o livro à lista de itens da biblioteca
-            JOptionPane.showMessageDialog(this, "Livro adicionado com sucesso!");
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Ano de publicação inválido.");
-        } catch (IllegalArgumentException e) {
-            JOptionPane.showMessageDialog(this, e.getMessage());
+        // Gera automaticamente o próximo ID para livro
+        String novoId = gerarProximoId("IDL");
+    
+        String titulo = JOptionPane.showInputDialog("Título do Livro:");
+        int ano = Integer.parseInt(JOptionPane.showInputDialog("Ano de Publicação:"));
+        String autor = JOptionPane.showInputDialog("Autor:");
+        String editora = JOptionPane.showInputDialog("Editora:");
+    
+        if (titulo.isEmpty() || autor.isEmpty() || editora.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Todos os campos devem ser preenchidos.");
+            return;
         }
+    
+        Livro livro = new Livro(novoId, titulo, ano, autor, editora);
+        Biblioteca.getInstance().adicionarItem(livro); // Adiciona o livro à lista de itens da biblioteca
+        JOptionPane.showMessageDialog(this, "Livro adicionado com sucesso! ID: " + novoId);
     }
-
+    
     private void adicionarRevista() {
-        try {
-            String id = JOptionPane.showInputDialog("ID da Revista:");
-            String titulo = JOptionPane.showInputDialog("Título da Revista:");
-            int ano = Integer.parseInt(JOptionPane.showInputDialog("Ano de Publicação:"));
-            int numeroEdicao = Integer.parseInt(JOptionPane.showInputDialog("Número da Edição:"));
-            String mesPublicacao = JOptionPane.showInputDialog("Mês de Publicação:");
-
-            if (id.isEmpty() || titulo.isEmpty() || mesPublicacao.isEmpty()) {
-                throw new IllegalArgumentException("Todos os campos devem ser preenchidos.");
-            }
-
-            Revista revista = new Revista(id, titulo, ano, numeroEdicao, mesPublicacao);
-            Biblioteca.getInstance().adicionarItem(revista); // Adiciona a revista à lista de itens da biblioteca
-            JOptionPane.showMessageDialog(this, "Revista adicionado com sucesso!");
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Dados numéricos inválidos.");
-        } catch (IllegalArgumentException e) {
-            JOptionPane.showMessageDialog(this, e.getMessage());
+        // Gera automaticamente o próximo ID para revista
+        String novoId = gerarProximoId("IDR");
+    
+        String titulo = JOptionPane.showInputDialog("Título da Revista:");
+        int ano = Integer.parseInt(JOptionPane.showInputDialog("Ano de Publicação:"));
+        int numeroEdicao = Integer.parseInt(JOptionPane.showInputDialog("Número da Edição:"));
+        String mesPublicacao = JOptionPane.showInputDialog("Mês de Publicação:");
+    
+        if (titulo.isEmpty() || mesPublicacao.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Todos os campos devem ser preenchidos.");
+            return;
         }
+    
+        Revista revista = new Revista(novoId, titulo, ano, numeroEdicao, mesPublicacao);
+        Biblioteca.getInstance().adicionarItem(revista); // Adiciona a revista à lista de itens da biblioteca
+        JOptionPane.showMessageDialog(this, "Revista adicionada com sucesso! ID: " + novoId);
     }
+    
+    // Método auxiliar para gerar o próximo ID
+    private String gerarProximoId(String prefixo) {
+        int maiorNumero = 0;
+    
+        // Procura pelo maior número entre os IDs com o prefixo fornecido
+        for (Item item : Biblioteca.getInstance().getListaItens()) {
+            if (item.getId().startsWith(prefixo)) {
+                try {
+                    int numeroAtual = Integer.parseInt(item.getId().substring(prefixo.length()));
+                    if (numeroAtual > maiorNumero) {
+                        maiorNumero = numeroAtual;
+                    }
+                } catch (NumberFormatException e) {
+                    // Ignora IDs que não seguem o padrão numérico
+                }
+            }
+        }
+    
+        // Retorna o próximo ID com o prefixo e número incrementado
+        return prefixo + (maiorNumero + 1);
+    }
+    
 
     /**
      * Método para remover um item (apenas para bibliotecários).
@@ -512,39 +532,69 @@ public class BibliotecaGUI extends JFrame {
      * Método para emprestar um item.
      */
     private void emprestarItem() {
-        String idItem = JOptionPane.showInputDialog("Informe o ID do item para empréstimo:");
-        Item item = Biblioteca.getInstance().buscarItem(idItem);
-        if (item != null) {
-            try {
-                usuarioAtual.emprestarItem(item);
-                JOptionPane.showMessageDialog(this, "Item emprestado com sucesso!");
-            } catch (ItemIndisponivelException e) {
-                JOptionPane.showMessageDialog(this, e.getMessage());
+        // Lista todos os itens disponíveis
+        List<Item> itensDisponiveis = Biblioteca.getInstance().getListaItens();
+        
+        if (itensDisponiveis.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Nenhum item disponível para empréstimo.");
+            return;
+        }
+        
+        // Cria uma lista de títulos para o usuário selecionar
+        String[] titulos = itensDisponiveis.stream()
+                                           .map(Item::getTitulo)
+                                           .toArray(String[]::new);
+    
+        // Solicita ao usuário que escolha um título
+        String tituloSelecionado = (String) JOptionPane.showInputDialog(this, "Selecione o item para empréstimo:", "Emprestar Item", JOptionPane.PLAIN_MESSAGE, null, titulos, titulos[0]);
+    
+        if (tituloSelecionado != null) {
+            // Busca o item selecionado pelo título
+            Item itemSelecionado = itensDisponiveis.stream().filter(item -> item.getTitulo().equals(tituloSelecionado)).findFirst().orElse(null);
+            
+            if (itemSelecionado != null) {
+                try {
+                    usuarioAtual.emprestarItem(itemSelecionado);
+                    JOptionPane.showMessageDialog(this, "Item '" + tituloSelecionado + "' emprestado com sucesso!");
+                } catch (ItemIndisponivelException e) {
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Item não encontrado.");
             }
-        } else {
-            JOptionPane.showMessageDialog(this, "Item não encontrado.");
         }
     }
+    
 
     /**
      * Método para devolver um item.
      */
     private void devolverItem() {
-        String idItem = JOptionPane.showInputDialog("Informe o ID do item para devolução:");
-        Item item = null;
-        for (Item i : usuarioAtual.itensEmprestados) {
-            if (i.getId().equals(idItem)) {
-                item = i;
-                break;
+        // Verifica se o usuário atual possui itens emprestados
+        if (usuarioAtual.itensEmprestados.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Você não possui itens para devolver.");
+            return;
+        }
+        
+        // Cria uma lista com os títulos dos itens emprestados
+        String[] titulosEmprestados = usuarioAtual.itensEmprestados.stream().map(Item::getTitulo).toArray(String[]::new);
+    
+        // Solicita que o usuário escolha o item que deseja devolver
+        String tituloSelecionado = (String) JOptionPane.showInputDialog(this, "Selecione o item para devolução:", "Devolver Item", JOptionPane.PLAIN_MESSAGE, null, titulosEmprestados, titulosEmprestados[0]);
+    
+        if (tituloSelecionado != null) {
+            // Busca o item emprestado pelo título selecionado
+            Item itemSelecionado = usuarioAtual.itensEmprestados.stream().filter(item -> item.getTitulo().equals(tituloSelecionado)).findFirst().orElse(null);
+    
+            if (itemSelecionado != null) {
+                usuarioAtual.devolverItem(itemSelecionado);
+                JOptionPane.showMessageDialog(this, "Item '" + tituloSelecionado + "' devolvido com sucesso!");
+            } else {
+                JOptionPane.showMessageDialog(this, "Item não encontrado nos seus empréstimos.");
             }
         }
-        if (item != null) {
-            usuarioAtual.devolverItem(item);
-            JOptionPane.showMessageDialog(this, "Item devolvido com sucesso!");
-        } else {
-            JOptionPane.showMessageDialog(this, "Item não encontrado nos seus empréstimos.");
-        }
     }
+    
 
     /**
      * Método principal para executar a interface gráfica.

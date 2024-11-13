@@ -7,15 +7,15 @@ import java.util.List;
 public class Administrador extends Membro {
 
     // Construtor da classe Administrador
-    public Administrador(String idMembro, String nome, String endereco, String login, String senha) {
-        super(idMembro, nome, endereco, login, senha);
+    public Administrador(String idMembro, String nome, String tipo, String login, String senha) {
+        super(idMembro, nome, tipo, login, senha);
     }
 
     // Método para editar um membro
-    public void editarMembro(Membro membro, String novoNome, String novoEndereco) {
+    public void editarMembro(Membro membro, String novoNome, String novoTipo) {
         // Atualiza o nome e endereço do membro
         membro.setNome(novoNome);
-        membro.setEndereco(novoEndereco);
+        membro.setTipoUsuario(novoTipo);
         System.out.println("Membro atualizado com sucesso!");
     }
 
@@ -27,10 +27,10 @@ public class Administrador extends Membro {
     }
 
     // Método para editar um bibliotecário
-    public void editarBibliotecario(Bibliotecario bibliotecario, String novoNome, String novoEndereco) {
+    public void editarBibliotecario(Bibliotecario bibliotecario, String novoNome, String novoTipo) {
         // Atualiza o nome e endereço do bibliotecário
         bibliotecario.setNome(novoNome);
-        bibliotecario.setEndereco(novoEndereco);
+        bibliotecario.setTipoUsuario(novoTipo);
         System.out.println("Bibliotecário atualizado com sucesso!");
     }
 
