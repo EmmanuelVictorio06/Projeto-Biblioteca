@@ -7,15 +7,15 @@ import java.util.ArrayList;
 public class Membro {
     protected String idMembro;
     protected String nome;
-    protected String endereco;
+    protected String tipoUsuario;
     protected String login;
     protected String senha;
     protected ArrayList<Item> itensEmprestados;
 
-    public Membro(String idMembro, String nome, String endereco, String login, String senha) {
+    public Membro(String idMembro, String nome, String tipoUsuario, String login, String senha) {
         this.idMembro = idMembro;
         this.nome = nome;
-        this.endereco = endereco;
+        this.tipoUsuario = tipoUsuario;
         this.login = login;
         this.senha = senha;
         this.itensEmprestados = new ArrayList<>(); // Inicializa a lista para evitar NullPointerException
@@ -37,8 +37,8 @@ public class Membro {
         return nome;
     }
 
-    public String getEndereco() {
-        return endereco;
+    public String getTipoUsuario() {
+        return tipoUsuario;
     }
     
     public void setIdMembro(String idMembro) {
@@ -49,8 +49,8 @@ public class Membro {
         this.nome = nome;
     }
 
-    public void setEndereco(String endereco) {
-        this.endereco = endereco;
+    public void setTipoUsuario(String tipoUsuario) {
+        this.tipoUsuario = tipoUsuario;
     }
 
     public void setLogin(String login) {

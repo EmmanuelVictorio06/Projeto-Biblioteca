@@ -52,7 +52,7 @@ public class BibliotecaGUI extends JFrame {
         // Obtem a lista de usuários do tipo especificado
         List<?> usuarios = tipoUsuario.equals("Membro") ? Biblioteca.getInstance().getListaMembros()
                                                         : Biblioteca.getInstance().getListaBibliotecarios();
-        String[] colunas = {"ID", "Nome", "Endereço", "Login"};
+        String[] colunas = {"ID", "Nome", "Tipo", "Login"};
         String[][] dados = new String[usuarios.size()][4];
 
         // Preenche a tabela com os dados dos usuários
@@ -61,13 +61,13 @@ public class BibliotecaGUI extends JFrame {
                 Membro membro = (Membro) usuarios.get(i);
                 dados[i][0] = membro.getIdMembro();
                 dados[i][1] = membro.getNome();
-                dados[i][2] = membro.getEndereco();
+                dados[i][2] = membro.getTipoUsuario();
                 dados[i][3] = membro.getLogin();
             } else {
                 Bibliotecario bibliotecario = (Bibliotecario) usuarios.get(i);
                 dados[i][0] = bibliotecario.getIdMembro();
                 dados[i][1] = bibliotecario.getNome();
-                dados[i][2] = bibliotecario.getEndereco();
+                dados[i][2] = bibliotecario.getTipoUsuario();
                 dados[i][3] = bibliotecario.getLogin();
             }
         }
@@ -142,7 +142,9 @@ public class BibliotecaGUI extends JFrame {
 
         // Campos para edição
         JTextField txtNome = new JTextField(usuario.getNome());
-        JTextField txtEndereco = new JTextField(usuario.getEndereco());
+        JComboBox<String> cmbTipoUsuario = new JComboBox<>(new String[]{"Membro", "Bibliotecario"});
+        cmbTipoUsuario.setSelectedItem(usuario.getTipoUsuario()); // Define o tipo atual como selecionado
+        JTextField txtTipoUsuario = new JTextField(usuario.getTipoUsuario());
         JTextField txtLogin = new JTextField(usuario.getLogin());
         JPasswordField txtSenha = new JPasswordField(usuario.getSenha());
 
@@ -150,8 +152,8 @@ public class BibliotecaGUI extends JFrame {
         editDialog.add(new JLabel(usuario.getIdMembro())); // Exibe o ID como label, não editável
         editDialog.add(new JLabel("Nome:"));
         editDialog.add(txtNome);
-        editDialog.add(new JLabel("Endereço:"));
-        editDialog.add(txtEndereco);
+        editDialog.add(new JLabel("Tipo:"));
+        editDialog.add(cmbTipoUsuario);
         editDialog.add(new JLabel("Login:"));
         editDialog.add(txtLogin);
         editDialog.add(new JLabel("Senha:"));
@@ -167,8 +169,8 @@ public class BibliotecaGUI extends JFrame {
                 usuario.setNome(txtNome.getText());
                 alterado = true;
             }
-            if (!txtEndereco.getText().equals(usuario.getEndereco())) {
-                usuario.setEndereco(txtEndereco.getText());
+            if (!cmbTipoUsuario.getSelectedItem().equals(usuario.getTipoUsuario())) {
+                usuario.setTipoUsuario((String) cmbTipoUsuario.getSelectedItem());
                 alterado = true;
             }
             if (!txtLogin.getText().equals(usuario.getLogin())) {
@@ -257,7 +259,7 @@ public class BibliotecaGUI extends JFrame {
             while ((linha = br.readLine()) != null) {
                 String[] dados = linha.split(",");
                 if (dados[0].equals(login) && dados[1].equals(senha)) {
-                    return new Administrador("adminID", "Administrador", "Endereco Admin", login, senha);
+                    return new Administrador("adminID", "Administrador", " Admin", login, senha);
                 }
             }
         } catch (IOException e) {
