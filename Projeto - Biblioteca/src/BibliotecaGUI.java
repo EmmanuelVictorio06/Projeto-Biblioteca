@@ -144,7 +144,6 @@ public class BibliotecaGUI extends JFrame {
         JTextField txtNome = new JTextField(usuario.getNome());
         JComboBox<String> cmbTipoUsuario = new JComboBox<>(new String[]{"Membro", "Bibliotecario"});
         cmbTipoUsuario.setSelectedItem(usuario.getTipoUsuario()); // Define o tipo atual como selecionado
-        JTextField txtTipoUsuario = new JTextField(usuario.getTipoUsuario());
         JTextField txtLogin = new JTextField(usuario.getLogin());
         JPasswordField txtSenha = new JPasswordField(usuario.getSenha());
 
