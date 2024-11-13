@@ -18,6 +18,7 @@ public class Membro {
         this.endereco = endereco;
         this.login = login;
         this.senha = senha;
+        this.itensEmprestados = new ArrayList<>(); // Inicializa a lista para evitar NullPointerException
     }
 
     public String getLogin() {
