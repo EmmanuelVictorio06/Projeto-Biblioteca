@@ -181,10 +181,10 @@ public class Biblioteca {
             for (Membro membro : listaMembros) {
                 if (membro instanceof Bibliotecario) {
                     // Salva os dados do bibliotecário no formato CSV
-                    pw.println("Bibliotecario," + membro.getIdMembro() + "," + membro.getNome() + "," + membro.getTipoUsuario() + "," + membro.getLogin() + "," + membro.getSenha());
+                    pw.println("Bibliotecario," + membro.getIdMembro() + "," + membro.getNome() + "," + membro.getEndereco() + "," + membro.getLogin() + "," + membro.getSenha());
                 } else {
                     // Salva os dados do membro no formato CSV
-                    pw.println("Membro," + membro.getIdMembro() + "," + membro.getNome() + "," + membro.getTipoUsuario() + "," + membro.getLogin() + "," + membro.getSenha());
+                    pw.println("Membro," + membro.getIdMembro() + "," + membro.getNome() + "," + membro.getEndereco() + "," + membro.getLogin() + "," + membro.getSenha());
                 }
             }
             System.out.println("Membros salvos com sucesso!");
@@ -209,16 +209,17 @@ public class Biblioteca {
                 String tipoUsuario = dados[0];
                 String id = dados[1];
                 String nome = dados[2];
+                String endereco = dados.length > 5 ? dados[3] : "";  // Campo opcional de endereço
                 String login = dados[dados.length > 5 ? 4 : 3];
                 String senha = dados[dados.length > 5 ? 5 : 4];
 
-                if (tipoUsuario.equalsIgnoreCase("Bibliotecario")) {
-                    // Cria um novo objeto Bibliotecario e adiciona à lista de bibliotecários
-                    Bibliotecario bibliotecario = new Bibliotecario(id, nome, tipoUsuario, login, senha);
-                    listaBibliotecarios.add(bibliotecario);
-                } else {
-                    // Assume que qualquer outro tipo é "Membro" e adiciona à lista de membros
-                    Membro membro = new Membro(id, nome, tipoUsuario, login, senha);
+                if (tipoUsuario.equals("Bibliotecario")) {
+                    // Cria um novo objeto Bibliotecario a partir dos dados lidos
+                    Bibliotecario bibliotecario = new Bibliotecario(id, nome, endereco, login, senha);
+                    listaMembros.add(bibliotecario);
+                } else if (tipoUsuario.equals("Membro")) {
+                    // Cria um novo objeto Membro a partir dos dados lidos
+                    Membro membro = new Membro(id, nome, endereco, login, senha);
                     listaMembros.add(membro);
                 }
             }
